@@ -22,7 +22,8 @@ main = do
                       }
       , modMask = mod4Mask     -- Rebind Mod to the Windows key
       , handleEventHook = handleEventHook desktopConfig <+> fullscreenEventHook
-      , borderWidth = 0
+      , borderWidth = 2
+      , focusedBorderColor = "yellow"
       } `additionalKeys`
       [ ((mod4Mask .|. shiftMask, xK_z), spawn "xscreensaver-command -lock; xset dpms force off")
       , ((mod4Mask .|. shiftMask, xK_f),
@@ -81,4 +82,6 @@ commonWebsites =
 
 mySteamGames =
   [ ("rimworld", "294100")
+  , ("hoi4", "394360")
+  , ("hearts of iron 4", "394360")
   ]
