@@ -7,6 +7,7 @@ import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.EZConfig(additionalKeys)
 import XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen)
+import XMonad.Layout.Spacing (spacingWithEdge)
 import System.IO
 
 main = do
@@ -14,7 +15,7 @@ main = do
 
     xmonad . ewmh $ desktopConfig
       { manageHook = manageDocks <+> manageHook desktopConfig <+> (isFullscreen --> doFullFloat)
-      , layoutHook = avoidStruts $ layoutHook desktopConfig
+      , layoutHook = spacingWithEdge 10 $ avoidStruts $ layoutHook desktopConfig
       , logHook = dynamicLogWithPP xmobarPP
                       { ppOutput = hPutStrLn xmproc
                       , ppTitle = xmobarColor "green" "" . shorten 50
