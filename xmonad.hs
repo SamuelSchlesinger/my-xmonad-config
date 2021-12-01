@@ -74,6 +74,8 @@ commonWebsites =
   , "reddit.com"
   , "mail.google.com"
   , "docs.rs"
+  , "github.com"
+  , "github.com/SamuelSchlesinger"
   ]
 
 mySteamGames =
