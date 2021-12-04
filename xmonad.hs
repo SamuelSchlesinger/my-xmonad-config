@@ -24,7 +24,8 @@ import XMonad.Layout.WindowSwitcherDecoration
 import XMonad.Layout.DecorationAddons
 import XMonad.Layout.ImageButtonDecoration
 import XMonad.Layout.DraggingVisualizer
-import XMonad.Util.Run (spawnPipe)
+import XMonad.Layout.Dwindle
+import XMonad.Util.Run (spawnPipe, safeSpawn)
 import XMonad.Util.EZConfig(additionalKeys)
 
 
@@ -41,10 +42,12 @@ main = do
           manageDocks
           <+> manageHook desktopConfig
           <+> (isFullscreen --> doFullFloat)
+      , workspaces = map projectName myProjects
       , layoutHook =
           avoidStruts
-          $ (   (windowSwitcherDecorationWithImageButtons shrinkText myTheme . draggingVisualizer . spacing 10) (GridRatio (3/2))
+          $ (   spacing 10 (GridRatio (3/2))
             ||| tabbed shrinkText myTheme
+            ||| spacing 10 (Tall { tallNMaster = 1, tallRatioIncrement = 3/100, tallRatio = 2/3 })
             )
       , logHook =
           dynamicLogWithPP xmobarPP
@@ -63,7 +66,7 @@ main = do
             FirefoxSearch
             xpromptConfig
             (mkComplFunFromList commonWebsites)
-            (\domain -> spawn ("firefox \"https://" <> domain <> "\""))
+            (\domain -> safeSpawn "firefox" ["https://" <> domain])
         )
       , ((mod4Mask .|. shiftMask, xK_s),
           mkXPrompt
@@ -71,12 +74,12 @@ main = do
             xpromptConfig
             (mkComplFunFromList (map fst mySteamGames))
           (\x -> case lookup x mySteamGames of
-            Just steamId -> spawn ("steam steam://rungameid/" <> steamId)
-            Nothing -> spawn "steam"
+            Just steamId -> safeSpawn "steam" ["steam://rungameid/" <> steamId]
+            Nothing -> safeSpawn "steam" []
           )
         )
       , ((mod4Mask .|. shiftMask, xK_h),
-          spawn "firefox ~/Documents/xmonad-keybindings-cheatsheet.png"
+          safeSpawn "firefox" ["~/Documents/xmonad-keybindings-cheatsheet.png"]
         )
       , ((mod4Mask .|. shiftMask, xK_l),
           addWorkspacePrompt xpromptConfig
@@ -109,13 +112,13 @@ instance XPrompt SteamGame where
 
 xpromptConfig :: XPConfig
 xpromptConfig = def
-  { font = "xft:FontAwesome:pixelsize=20"
+  { font = "xft:Monospace:pixelsize=20"
   , height = 30
   , showCompletionOnTab = False
-  , bgColor = "darkblue"
-  , fgColor = "lightblue"
-  , bgHLight = "white"
-  , fgHLight = "darkblue"
+  , bgColor = "grey"
+  , fgColor = "darkblue"
+  , bgHLight = "black"
+  , fgHLight = "blue"
   }
 
 commonWebsites :: [String]
@@ -143,21 +146,64 @@ myTerminal = "terminator"
 
 myProjects :: [Project]
 myProjects =
-  [ gaming
+  [ defaultProject
+  , discord
+  , browser
+  , development
+  , steam
   , casper
+  , biomassBreakout
+  , xmonad
   ]
   where
+    defaultProject = Project
+      { projectName = "default"
+      , projectDirectory = "~"
+      , projectStartHook = Nothing
+      }
+    discord = Project
+      { projectName = "discord"
+      , projectDirectory = "~/.Discord"
+      , projectStartHook = Just $ do
+          spawn "~/.Discord/Discord"
+      }
+    browser = Project
+      { projectName = "browser"
+      , projectDirectory = "~/.xmonad"
+      , projectStartHook = Just $ do
+          safeSpawn "firefox" []
+      }
+    xmonad = Project
+      { projectName = "xmonad"
+      , projectDirectory = "~/.xmonad"
+      , projectStartHook = Just $ do
+          safeSpawn myTerminal ["-e", "vim xmonad.hs"]
+      }
+    development = Project
+      { projectName = "coding"
+      , projectDirectory = "~/Documents/GitHub/SamuelSchlesinger"
+      , projectStartHook = Just $ do
+          safeSpawn myTerminal []
+      }
     casper = Project
       { projectName = "casper"
       , projectDirectory = "~/Documents/GitHub/SamuelSchlesinger/casper-node"
       , projectStartHook = Just $ do
-          spawn myTerminal
+          safeSpawn myTerminal []
       } 
-    gaming = Project
-      { projectName = "gaming"
+    steam = Project
+      { projectName = "steam"
       , projectDirectory = "~"
       , projectStartHook = Just $ do
-          spawn "steam"
+          safeSpawn "steam" []
+      }
+    biomassBreakout = Project
+      { projectName = "biomass-breakout"
+      , projectDirectory = "~/Documents/GitHub/SamuelSchlesinger/biomass-breakout"
+      , projectStartHook = Just $ do
+          safeSpawn myTerminal ["-e", "vim -c \":GFiles\""]
+          safeSpawn "firefox" ["https://docs.rs/glium"]
+          safeSpawn "firefox" ["https://docs.rs/glutin"]
       }
 
 myTheme = defaultThemeWithImageButtons
