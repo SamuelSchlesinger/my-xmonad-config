@@ -1,12 +1,13 @@
 Config
-  { font = "xft:FontAwesome:pixelsize=16"
+  { font = "xft:Monospace:pixelsize=22"
   , borderColor = "black"
   , border = TopB
   , bgColor = "black"
   , fgColor = "white"
-  , position = TopW L 100
+  , position = BottomW L 100
   , commands =
-      [ Run Weather "KBDL" ["-t","Outside Temp: <tempC>C","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
+      [ Run Weather "KBDL"
+        ["-t","Outside Temp: <tempF>F","-L","55","-H","80","--normal","green","--high","red","--low","lightblue"] 36000
       , Run Network "wlo1" ["-L","0","-H","32","--normal","green","--high","red"] 10
       , Run Wireless "wlo1" ["-t", "Wifi: <qualityvbar>", "-l", "red", "-h", "green"] 10
       , Run Cpu ["-t", "Cpu: <vbar>", "-L","25","-H","75","--normal","green","--high","red"] 10

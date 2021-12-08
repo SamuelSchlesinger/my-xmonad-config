@@ -9,12 +9,12 @@ import XMonad.Prompt.XMonad
 
 import XMonad.Config.Desktop (desktopConfig)
 
-import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.DynamicLog (xmobar)
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen)
 
-import XMonad.Actions.DynamicProjects (switchProjectPrompt, Project(..), dynamicProjects, switchProject)
+import XMonad.Actions.DynamicProjects (switchProjectPrompt, Project(..), dynamicProjects, switchProject, shiftToProjectPrompt)
 import XMonad.Actions.DynamicWorkspaces (addWorkspacePrompt)
 
 import XMonad.Layout.Spacing (spacing)
@@ -34,9 +34,7 @@ import System.IO
 
 main :: IO ()
 main = do
-    xmproc <- spawnPipe "xmobar"
-
-    xmonad . dynamicProjects myProjects $ desktopConfig
+    (xmonad =<<) . xmobar . dynamicProjects myProjects $ desktopConfig
       { terminal = myTerminal
       , manageHook =
           manageDocks
@@ -49,11 +47,6 @@ main = do
             ||| tabbed shrinkText myTheme
             ||| spacing 10 (Tall { tallNMaster = 1, tallRatioIncrement = 3/100, tallRatio = 2/3 })
             )
-      , logHook =
-          dynamicLogWithPP xmobarPP
-          { ppOutput = hPutStrLn xmproc
-          , ppTitle = xmobarColor "green" "" . shorten 50
-          }
       , modMask = mod4Mask     -- Rebind Mod to the Windows key
       , handleEventHook =
           handleEventHook desktopConfig
@@ -86,6 +79,9 @@ main = do
         )
       , ((mod4Mask .|. shiftMask, xK_p),
           switchProjectPrompt xpromptConfig
+        )
+      , ((mod4Mask .|. shiftMask, xK_o),
+          shiftToProjectPrompt xpromptConfig
         )
       , ((mod4Mask .|. shiftMask, xK_m),
           manPrompt xpromptConfig
@@ -154,6 +150,7 @@ myProjects =
   , casper
   , biomassBreakout
   , xmonad
+  , nordpass
   ]
   where
     defaultProject = Project
@@ -201,9 +198,19 @@ myProjects =
       { projectName = "biomass-breakout"
       , projectDirectory = "~/Documents/GitHub/SamuelSchlesinger/biomass-breakout"
       , projectStartHook = Just $ do
-          safeSpawn myTerminal ["-e", "vim -c \":GFiles\""]
           safeSpawn "firefox" ["https://docs.rs/glium"]
           safeSpawn "firefox" ["https://docs.rs/glutin"]
+          safeSpawn myTerminal ["-e", "vim -c \":GFiles\""]
+      }
+    nordpass = Project
+      { projectName = "nordpass"
+      , projectDirectory = "~"
+      , projectStartHook = Just $ safeSpawn "nordpass" []
+      }
+    vimrc = Project
+      { projectName = "vimrc"
+      , projectDirectory = "~"
+      , projectStartHook = Just $ safeSpawn "vim" ["~/.vimrc"]
       }
 
 myTheme = defaultThemeWithImageButtons
