@@ -138,7 +138,7 @@ mySteamGames =
   ]
 
 myTerminal :: String
-myTerminal = "terminator"
+myTerminal = "alacritty"
 
 myProjects :: [Project]
 myProjects =
@@ -151,12 +151,14 @@ myProjects =
   , biomassBreakout
   , xmonad
   , nordpass
+  , cluster
   ]
   where
     defaultProject = Project
       { projectName = "default"
       , projectDirectory = "~"
-      , projectStartHook = Nothing
+      , projectStartHook = Just $ do
+          safeSpawn "nordvpn" ["connect"]
       }
     discord = Project
       { projectName = "discord"
@@ -211,6 +213,11 @@ myProjects =
       { projectName = "vimrc"
       , projectDirectory = "~"
       , projectStartHook = Just $ safeSpawn "vim" ["~/.vimrc"]
+      }
+    cluster = Project
+      { projectName = "cluster"
+      , projectDirectory = "~/Documents/GitHub/SamuelSchlesinger/cluster"
+      , projectStartHook = Just $ safeSpawn myTerminal []
       }
 
 myTheme = defaultThemeWithImageButtons
